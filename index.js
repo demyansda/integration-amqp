@@ -48,12 +48,12 @@ function createChannel(url) {
             console.log('Channel created. URL: %s', url);
             return channel;
         },
-            function (error) {
-                if (conn) {
-                    conn.close();
-                }
-                throw error;
-            });
+        function (error) {
+            if (conn) {
+                conn.close();
+            }
+            throw error;
+        });
 }
 
 exports.createSender = function (queue, url) {
@@ -69,6 +69,7 @@ exports.createReciever = function (queue, url, callback) {
         url = undefined;
     }
     url = url || DEFAULT_URL;
+    var p = Promise.resolve();
     return createChannel(url).then(function (channel) {
         channel.assertQueue(queue, { durable: true });
         channel.prefetch(1);
@@ -78,7 +79,6 @@ exports.createReciever = function (queue, url, callback) {
                 data = JSON.parse(data);
             } catch (error) {
             }
-            var p = Promise.resolve();
             if (typeof callback === 'function') {
                 p = p.then(callback(data, msg, channel));
             }
