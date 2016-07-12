@@ -1,15 +1,12 @@
-/* global process */
-/* global Buffer */
 var amqplib = require('amqplib');
 
-var DEFAULT_URL = process.env['CLOUDAMQP_URL'] || 'amqp://localhost';
+var DEFAULT_URL = process.env.CLOUDAMQP_URL || 'amqp://localhost';
 
 function Sender(channel, queue) {
     this.channel = channel;
     this.queue = queue;
     channel.assertQueue(queue, { durable: true });
     console.log('Sender created. Queue: %s', queue);
-
 }
 
 Sender.prototype.close = function (closeConnection) {
@@ -69,7 +66,6 @@ exports.createReciever = function (queue, url, callback) {
         url = undefined;
     }
     url = url || DEFAULT_URL;
-    var p = Promise.resolve();
     return createChannel(url).then(function (channel) {
         channel.assertQueue(queue, { durable: true });
         channel.prefetch(1);
@@ -79,6 +75,7 @@ exports.createReciever = function (queue, url, callback) {
                 data = JSON.parse(data);
             } catch (error) {
             }
+            var p = Promise.resolve();
             if (typeof callback === 'function') {
                 p = p.then(callback(data, msg, channel));
             }
